@@ -2,48 +2,77 @@ import telebot
 import time
 import random
 import threading
+from PIL import Image, ImageDraw, ImageFont
+import io
 
 # 🔑 Твой токен
 TOKEN = "8357091966:AAE_bsrgQAvwjb410w3vk7lLd2Dq6rxCheU"
 bot = telebot.TeleBot(TOKEN)
 
-# 📜 Список цитат
+# 📜 Цитаты
 quotes = [
-    '"Познай самого себя." — Сократ',
-    '"Я мыслю, следовательно, я существую." — Декарт',
-    '"Человек есть то, что он делает." — Сартр',
-    '"Мужество — это знать, чего не стоит бояться." — Платон',
-    '"Мудрый человек не говорит всё, что думает." — Аристотель',
+    'Познай самого себя. — Сократ',
+    'Я мыслю, следовательно, я существую. — Декарт',
+    'Мужество — это знать, чего не стоит бояться. — Платон',
+    'Человек становится тем, о чём он думает весь день. — Эмерсон',
+    'Мудрый человек не говорит всё, что думает. — Аристотель',
+    'Если хочешь быть счастливым — будь им. — Толстой',
+    'Свобода начинается с внутренней независимости. — Сенека'
 ]
 
-# 🕊️ Оформление сообщения
-def format_quote(quote):
-    return f"""📜 *Мудрость дня*\n
-_{quote}_
+# 🎨 Генерация изображения с цитатой
+def generate_quote_image(text):
+    img = Image.new('RGB', (1080, 1080), color=(245, 222, 179))  # фон пергамента
+    draw = ImageDraw.Draw(img)
 
-━━━━━━━━━━━━━━━━━━━
-💬 Поддержать проект:
-💳 ВТБ: 2200 2460 3013 9912
-"""
+    # Заголовок
+    title = "📜 Мудрость дня"
+    font_title = ImageFont.truetype("arial.ttf", 60)
+    font_text = ImageFont.truetype("arial.ttf", 50)
 
-# 💫 Автоматическая отправка цитаты каждые 2 часа
-def send_quote_periodically():
-    while True:
-        quote = random.choice(quotes)
-        message = format_quote(quote)
-        bot.send_message("@daily_philosoph", message, parse_mode="Markdown")
-        time.sleep(7200)  # 2 часа = 7200 секунд
+    # Рисуем текст
+    draw.text((100, 80), title, font=font_title, fill=(80, 50, 20))
+    draw.text((100, 300), text, font=font_text, fill=(40, 30, 10))
 
-# 🧩 Запуск фонового потока
-threading.Thread(target=send_quote_periodically, daemon=True).start()
+    # Преобразуем в байты
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format='PNG')
+    img_bytes.seek(0)
+    return img_bytes
 
-# 💬 Возможность ручной публикации
-@bot.message_handler(commands=['quote'])
-def send_quote(message):
+# Счётчик публикаций
+post_counter = 0
+
+# 🕊️ Отправка цитаты
+def send_quote():
+    global post_counter
+    post_counter += 1
+
     quote = random.choice(quotes)
-    formatted = format_quote(quote)
-    bot.send_message(message.chat.id, formatted, parse_mode="Markdown")
+    img = generate_quote_image(quote)
 
-# 🚀 Запуск
+    # Каждая 5-я публикация — с реквизитами
+    if post_counter % 5 == 0:
+        caption = "💬 Поддержать проект:\n💳 ВТБ: 2200 2460 3013 9912"
+    else:
+        caption = ""
+
+    bot.send_photo("@daily_philosoph", img, caption=caption)
+
+# 🔁 Автоматическая отправка каждые 2 часа
+def schedule_quotes():
+    while True:
+        send_quote()
+        time.sleep(7200)  # каждые 2 часа
+
+# 🚀 Запуск фонового потока
+threading.Thread(target=schedule_quotes, daemon=True).start()
+
+# ✋ Ручная публикация
+@bot.message_handler(commands=['quote'])
+def manual_post(message):
+    send_quote()
+    bot.reply_to(message, "Новая цитата опубликована!")
+
+# ▶️ Запуск бота
 bot.polling(none_stop=True)
-
