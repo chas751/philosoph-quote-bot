@@ -70,7 +70,35 @@ threading.Thread(target=schedule_quotes, daemon=True).start()
 
 # ✋ Ручная публикация
 @bot.message_handler(commands=['quote'])
-def manual_post(message):
+def manual_post(message):from flask import Flask
+import threading
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return "Bot is running!"
+
+def run_flask():
+    app.run(host='0.0.0.0', port=10000)
+
+if __name__ == "__main__":
+    import threading
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+
+    # твой код бота ниже
+    import telebot
+    from config import TOKEN
+
+    bot = telebot.TeleBot(TOKEN)
+
+    @bot.message_handler(commands=['start'])
+    def start(message):
+        bot.send_message(message.chat.id, "Привет! Бот работает на Render!")
+
+    bot.polling(none_stop=True)
+
     send_quote()
     bot.reply_to(message, "Новая цитата опубликована!")
 
