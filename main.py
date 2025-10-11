@@ -1,50 +1,39 @@
 import telebot
-import random
-import time
+from flask import Flask
+import os
 
-TOKEN = TOKEN = "8357091966:AAE_bsrgQAvwjb410w3vk7lLd2Dq6rxCheU"
-
+# === Твой токен ===
+TOKEN = "8357091966:AAE_bsrgQAvwjb410w3vk7lLd2Dq6rxCheU"
 bot = telebot.TeleBot(TOKEN)
 
-# Список философских цитат
-quotes = [
-    "📜 «Познай самого себя.» — Сократ",
-    "📜 «Мы становимся тем, о чём думаем.» — Будда",
-    "📜 «Счастье зависит от нас самих.» — Аристотель",
-    "📜 «Мудрость — это знание того, что ты ничего не знаешь.» — Сократ",
-    "📜 «Не тот велик, кто никогда не падал, а тот, кто поднимается каждый раз, когда падает.» — Конфуций",
-]
+# === Flask web server для Render ===
+app = Flask(__name__)
 
-donate_message = """
-💫 Поддержи проект философских цитат:
+@app.route('/')
+def index():
+    return "Bot is running!"
 
-💰 TRX (USDT): `TErjzxxbTg1uvhEDBzpnvDr2p3g1RRw5Pd`
+# === Основная логика бота ===
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    bot.reply_to(message, "Привет! 🌿 Я философский бот. Каждый день — новая мудрость!")
 
-🙏 Благодарю за помощь и интерес к мудрости!
-"""
+@bot.message_handler(func=lambda m: True)
+def echo_all(message):
+    bot.reply_to(message, "Мудрость: философ ищет смысл, а не ответы.")
 
-# Переменная для счёта сообщений
-message_count = 0
+# === Запуск ===
+if __name__ == "__main__":
+    # Flask нужен, чтобы Render не упал
+    import threading
 
-@bot.message_handler(commands=["start"])
-def start(message):
-    bot.send_message(
-        message.chat.id,
-        "🧘‍♂️ Добро пожаловать в «Мудрость дня»!\nКаждый день — новая мысль великих философов.\n\nНапиши /quote, чтобы получить цитату.",
-    )
+    def run_flask():
+        port = int(os.environ.get("PORT", 5000))
+        app.run(host="0.0.0.0", port=port)
 
-@bot.message_handler(commands=["quote"])
-def send_quote(message):
-    global message_count
-    quote = random.choice(quotes)
-    message_count += 1
+    def run_bot():
+        bot.polling(none_stop=True, interval=0, timeout=30)
 
-    bot.send_message(message.chat.id, quote)
-
-    # Каждые 5 сообщений добавляем реквизиты
-    if message_count % 5 == 0:
-        time.sleep(1)
-        bot.send_message(message.chat.id, donate_message, parse_mode="Markdown")
-
-print("🤖 Бот запущен успешно!")
-bot.polling(none_stop=True)
+    # Запускаем Flask и бота одновременно
+    threading.Thread(target=run_flask).start()
+    run_bot()
