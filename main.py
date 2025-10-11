@@ -2,7 +2,8 @@ import telebot
 import random
 import time
 
-TOKEN = "сюда_вставь_свой_бот_токен"  # вставь свой токен
+TOKEN = TOKEN = "8357091966:AAE_bsrgQAvwjb410w3vk7lLd2Dq6rxCheU"
+
 bot = telebot.TeleBot(TOKEN)
 
 # Список философских цитат
