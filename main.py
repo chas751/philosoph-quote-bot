@@ -19,8 +19,3 @@ def echo_all(message):
     bot.reply_to(message, "🧠 Мудрость: философ ищет смысл, а не ответы.")
 
 def run_flask():
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
-
-def run_bot():
-    bot.polling(none_stop=True, interval=0, timeout=30)
