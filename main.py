@@ -24,8 +24,3 @@ def run_flask():
 
 def run_bot():
     bot.polling(none_stop=True, interval=0, timeout=30)
-
-if __name__ == '__main__':
-    threading.Thread(target=run_flask).start()
-    run_bot()
-
