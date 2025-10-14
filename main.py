@@ -19,13 +19,3 @@ def webhook():
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(message, "Привет! 🌿 Я философский бот. Каждый день — новая мудрость!")
-
-@bot.message_handler(func=lambda m: True)
-def echo_all(message):
-    bot.reply_to(message, "🧠 Мудрость: философ ищет смысл, а не ответы.")
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    bot.remove_webhook()
-    bot.set_webhook(url=f'https://philosoph-quote-bot.onrender.com/{TOKEN}')
-    app.run(host='0.0.0.0', port=port)
