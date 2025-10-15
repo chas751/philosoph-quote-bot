@@ -43,8 +43,3 @@ def cmd_quote(message):
 @bot.message_handler(func=lambda m: True)
 def echo_all(message):
     bot.send_message(message.chat.id, "Я получил: " + (message.text or "<no text>"))
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    # Do not call bot.polling() when using webhook — webhook handled by Flask.
-    app.run(host='0.0.0.0', port=port)
