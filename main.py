@@ -17,7 +17,7 @@ def webhook():
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, "Привет! Бот работает!")
+    bot.send_message(message.chat.id, "✅ Привет! Бот успешно работает!")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
