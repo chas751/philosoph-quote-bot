@@ -1,45 +1,31 @@
-import telebot
 from flask import Flask, request
+import requests
 import logging
-import os
 
-# ====== ВАШ ТОКЕН ======
-TOKEN = "8357091966:AAGdvUQnHejEjJ9B5RG69tNad9bVt7G-_1M"
-# =======================
+TOKEN = "8228885470:AAFxS7h1Y5bYxSyjhAVG7FIahdSaJCoESBs"
+API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
-bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
-
-# лог в stdout — будет виден в логах Render
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        try:
-            json_str = request.get_data().decode('utf-8')
-            logger.info("Incoming raw update: %s", json_str)
-            update = telebot.types.Update.de_json(json_str)
-            bot.process_new_updates([update])
-        except Exception as e:
-            logger.exception("Failed to process update: %s", e)
-            return "ERR", 500
-        return '', 200
-    else:
-        return 'Bot is alive!', 200
+@app.route('/', methods=['POST'])
+def webhook():
+    update = request.get_json()
+    logging.info(f"Incoming raw update: {update}")
 
-# simple /start handler
-@bot.message_handler(commands=['start'])
-def cmd_start(message):
-    bot.send_message(message.chat.id, "✅ Привет! Бот запущен и готов. Напиши /quote чтобы получить цитату.")
+    if 'message' in update:
+        chat_id = update['message']['chat']['id']
+        text = update['message'].get('text', '')
 
-# simple /quote handler (example)
-@bot.message_handler(commands=['quote'])
-def cmd_quote(message):
-    bot.send_message(message.chat.id, "«Мудрость — это не запас знаний, а умение жить»")
+        if text == '/start':
+            send_message(chat_id, "Привет! 👋 Я философский бот. Каждый день — новая мудрость.")
+        else:
+            send_message(chat_id, f"Ты написал: {text}")
 
-# catch-all (echo) — временно, можно удалить
-@bot.message_handler(func=lambda m: True)
-def echo_all(message):
-    bot.send_message(message.chat.id, "Я получил: " + (message.text or "<no text>"))
+    return 'OK', 200
+
+def send_message(chat_id, text):
+    requests.post(f"{API_URL}/sendMessage", json={'chat_id': chat_id, 'text': text})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=10000)
