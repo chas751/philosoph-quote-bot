@@ -1,6 +1,11 @@
 from aiogram import Bot, Dispatcher, executor, types
+from dotenv import load_dotenv
+import os
+import random
 
-TOKEN = "ВСТАВЬ_СВОЙ_ТОКЕН_ОТ_BOTFATHER"
+# Загружаем токен из .env
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
@@ -16,7 +21,6 @@ async def send_quote(message: types.Message):
         "Мыслить — значит спорить с собой. — Аристотель",
         "Мудрый человек не говорит всё, что думает. — Сенека",
     ]
-    import random
     await message.answer(random.choice(quotes))
 
 if __name__ == "__main__":
