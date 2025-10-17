@@ -5,14 +5,13 @@ import random
 from threading import Thread
 from flask import Flask
 
-# Загрузка токена
+# Загрузка токена из окружения
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
-# Основные команды
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
     await message.answer(
@@ -31,23 +30,23 @@ async def send_quote(message: types.Message):
     ]
     await message.answer(random.choice(quotes))
 
-# Фиктивный веб-сервер для Render Free
-app = Flask("")
+# --- небольшой Flask-сервер, чтобы Render принял это как Web Service (free) ---
+app = Flask("philosoph-bot")
 
 @app.route("/")
 def index():
-    return "Bot is running!"
+    return "Bot is running"
 
 @app.route("/healthz")
 def health():
     return "OK"
 
 def run_flask():
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    # Render передаёт порт в переменной PORT
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
-# Запуск Flask в отдельном потоке
 Thread(target=run_flask).start()
 
-# Запуск бота через long polling
+# Запуск aiogram bot (long polling)
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
