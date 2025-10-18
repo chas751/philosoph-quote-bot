@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-if not BOT_TOKEN:
+if not BOT_TOKEN:8228885470:AAFxS7h1Y5bYxSyjhAVG7FIahdSaJCoESBs
     raise RuntimeError("BOT_TOKEN not set. Add it to .env or Render Environment Variables.")
 
 bot = Bot(token=BOT_TOKEN)
