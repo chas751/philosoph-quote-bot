@@ -1,0 +1,6 @@
+services:
+  - type: worker
+    name: philosoph-quote-bot
+    env: python
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: python bot.py
